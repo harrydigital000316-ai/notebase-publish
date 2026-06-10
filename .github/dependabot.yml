@@ -1,0 +1,51 @@
+version: 2
+updates:
+  - package-ecosystem: "pip"
+    directory: "/"
+    schedule:
+      interval: "weekly"
+      day: "monday"
+      time: "09:00"
+      timezone: "Asia/Taipei"
+    open-pull-requests-limit: 10
+    labels:
+      - "dependencies"
+      - "pip"
+    commit-message:
+      prefix: "deps(pip)"
+    groups:
+      dev-dependencies:
+        patterns:
+          - "pytest*"
+          - "ruff*"
+          - "mypy*"
+          - "types-*"
+        update-types:
+          - "minor"
+          - "patch"
+      main-dependencies:
+        patterns:
+          - "typer"
+          - "rich"
+          - "markdown-it-py"
+          - "pyyaml"
+          - "jinja2"
+          - "rapidfuzz"
+          - "watchfiles"
+          - "graphviz"
+        update-types:
+          - "minor"
+          - "patch"
+
+  - package-ecosystem: "github-actions"
+    directory: "/"
+    schedule:
+      interval: "weekly"
+      day: "monday"
+      time: "09:00"
+      timezone: "Asia/Taipei"
+    labels:
+      - "dependencies"
+      - "github-actions"
+    commit-message:
+      prefix: "deps(actions)"

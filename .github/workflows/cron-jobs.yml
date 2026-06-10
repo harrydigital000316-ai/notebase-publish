@@ -24,6 +24,9 @@ on:
     - cron: '0 1 * * 6'
   workflow_dispatch:
 
+env:
+  TZ: Asia/Taipei
+
 jobs:
   nightly-skill-learning:
     if: github.event.schedule == '0 0 * * *' || github.event_name == 'workflow_dispatch'
@@ -163,10 +166,16 @@ jobs:
       - name: Run Global Macro analysis
         run: |
           echo "Running 20:00 Global Macro analysis..."
-          # Condensed output for Telegram
-          # Full analysis to notebase vault
+          # 1. Generate full analysis (write to vault)
+          # 2. Generate condensed summary (for Telegram/Slack)
+          # 3. Notify via webhook
         env:
           HERMES_API_KEY: ${{ secrets.HERMES_API_KEY }}
+      - name: Notify completion
+        if: always()
+        run: |
+          echo "Global Macro job completed at $(date)"
+          # curl -X POST ${{ secrets.NOTIFY_WEBHOOK }} -d '{"text":"Global Macro done"}'
 
   dev-cycle-21-deploy:
     if: github.event.schedule == '0 21 * * *' || github.event_name == 'workflow_dispatch'
