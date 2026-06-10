@@ -1,0 +1,51 @@
+{% extends "base.html" %}
+
+{% block title %}#{{ tag }} — Tag Index | notebase-publish{% endblock %}
+{% block description %}All notes tagged with #{{ tag }}{% endblock %}
+{% block body_class %}tag-page{% endblock %}
+
+{% block content %}
+<header class="page-header">
+    <nav class="breadcrumb" aria-label="Breadcrumb">
+        <a href="/">Home</a> / <a href="/tags/">Tags</a> / <span>#{{ tag }}</span>
+    </nav>
+    <h1 class="page-title">#{{ tag }}</h1>
+    <p class="page-subtitle">{{ notes|length }} note{{ notes|length != 1 and 's' or '' }}</p>
+</header>
+
+{% if related_tags %}
+<section class="related-tags" aria-labelledby="related-tags-title">
+    <h2 id="related-tags-title" class="visually-hidden">Related tags</h2>
+    <div class="tag-cloud">
+        {% for related in related_tags %}
+        <a href="/tags/{{ related.replace('/', '_').replace(' ', '-') }}.html" class="tag-cloud-item">
+            <span class="tag-name">#{{ related }}</span>
+        </a>
+        {% endfor %}
+    </div>
+</section>
+{% endif %}
+
+<section class="notes-list" aria-labelledby="notes-title">
+    <h2 id="notes-title" class="visually-hidden">Notes tagged #{{ tag }}</h2>
+    {% if notes %}
+    <ul class="notes-grid">
+        {% for note in notes %}
+        <li class="note-card">
+            <a href="/note/{{ note.slug }}.html" class="note-link">
+                <h3 class="note-card-title">{{ note.title }}</h3>
+                <p class="note-card-excerpt">{{ note.content[:200] | striptags }}...</p>
+                <div class="note-card-meta">
+                    {% if note.created %}
+                    <time datetime="{{ note.created.isoformat() }}">{{ note.created.strftime("%Y-%m-%d") }}</time>
+                    {% endif %}
+                </div>
+            </a>
+        </li>
+        {% endfor %}
+    </ul>
+    {% else %}
+    <p class="empty-state">No notes with this tag.</p>
+    {% endif %}
+</section>
+{% endblock %}

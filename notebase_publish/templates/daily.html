@@ -1,0 +1,43 @@
+{% extends "base.html" %}
+
+{% block title %}Daily Logs Timeline | notebase-publish{% endblock %}
+{% block description %}Chronological archive of daily logs and thought streams{% endblock %}
+{% block body_class %}daily-page{% endblock %}
+
+{% block content %}
+<header class="page-header">
+    <nav class="breadcrumb" aria-label="Breadcrumb">
+        <a href="/">Home</a> / <span>Daily Logs</span>
+    </nav>
+    <h1 class="page-title">📅 Daily Logs</h1>
+    <p class="page-subtitle">Chronological archive of thought stream</p>
+</header>
+
+<section class="daily-timeline" aria-labelledby="timeline-title">
+    <h2 id="timeline-title" class="visually-hidden">Daily logs timeline</h2>
+    {% if daily_notes %}
+    <ul class="timeline">
+        {% for note in daily_notes %}
+        <li class="timeline-item">
+            <div class="timeline-marker"></div>
+            <div class="timeline-content">
+                <time class="timeline-date" datetime="{{ note.created.isoformat() }}">
+                    {{ note.created.strftime("%Y年%m月%d日 (%a)") }}
+                </time>
+                <a href="/note/{{ note.slug }}.html" class="timeline-title">{{ note.title }}</a>
+                {% if note.tags %}
+                <div class="timeline-tags">
+                    {% for tag in note.tags if tag != 'daily' %}
+                    <span class="tag-tag">#{{ tag }}</span>
+                    {% endfor %}
+                </div>
+                {% endif %}
+            </div>
+        </li>
+        {% endfor %}
+    </ul>
+    {% else %}
+    <p class="empty-state">No daily logs yet. Run <code>notebase daily</code> to create one.</p>
+    {% endif %}
+</section>
+{% endblock %}

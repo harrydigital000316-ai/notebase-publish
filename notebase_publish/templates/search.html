@@ -1,0 +1,169 @@
+{% extends "base.html" %}
+
+{% block title %}Search | notebase-publish{% endblock %}
+{% block description %}Search across all notes, tags, and content{% endblock %}
+{% block body_class %}search-page{% endblock %}
+
+{% block extra_head %}
+<style>
+.search-results {
+    list-style: none;
+    padding: 0;
+}
+.search-result {
+    padding: 1rem;
+    margin-bottom: 0.5rem;
+    background: var(--bg-secondary);
+    border-radius: 8px;
+    border: 1px solid var(--border-color);
+    transition: transform 0.15s, box-shadow 0.15s;
+}
+.search-result:hover {
+    transform: translateY(-2px);
+    box-shadow: var(--shadow-md);
+}
+.search-result-title {
+    font-size: 1.1rem;
+    font-weight: 600;
+    margin-bottom: 0.25rem;
+}
+.search-result-title a {
+    color: var(--fg-primary);
+    text-decoration: none;
+}
+.search-result-title a:hover {
+    color: var(--accent);
+}
+.search-result-excerpt {
+    color: var(--fg-secondary);
+    font-size: 0.9rem;
+    margin-bottom: 0.5rem;
+    line-height: 1.5;
+}
+.search-result-meta {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0.5rem;
+    font-size: 0.75rem;
+    color: var(--fg-tertiary);
+}
+.search-highlight {
+    background: var(--accent-bg);
+    padding: 0 0.125rem;
+    border-radius: 2px;
+}
+</style>
+{% endblock %}
+
+{% block content %}
+<header class="page-header">
+    <nav class="breadcrumb" aria-label="Breadcrumb">
+        <a href="/">Home</a> / <span>Search</span>
+    </nav>
+    <h1 class="page-title">🔍 Search</h1>
+    <p class="page-subtitle">Find notes, tags, and concepts instantly</p>
+</header>
+
+<section class="search-section" aria-labelledby="search-title">
+    <form action="/search.html" method="get" class="search-form search-form-large">
+        <label for="search-input" class="visually-hidden">Search query</label>
+        <input type="search" id="search-input" name="q" value="{{ query | default('') }}" placeholder="Search notes, tags, content... (try: transformer, investing, AI agent)" autocomplete="off" autofocus>
+        <button type="submit" aria-label="Search">🔍 Search</button>
+    </form>
+</section>
+
+<section class="results-section" aria-labelledby="results-title">
+    <h2 id="results-title">Results {% if query %}for <strong>"{{ query }}"</strong> {% endif %}</h2>
+
+    {% if results is defined and results %}
+    <p class="results-count">{{ results|length }} result{{ results|length != 1 and 's' or '' }}</p>
+    <ul class="search-results" role="list">
+        {% for result in results %}
+        <li class="search-result">
+            <h3 class="search-result-title">
+                <a href="{{ result.url }}">{{ result.title | safe }}</a>
+            </h3>
+            <p class="search-result-excerpt">{{ result.excerpt | safe }}</p>
+            <div class="search-result-meta">
+                {% if result.tags %}
+                <span class="tags">
+                    {% for tag in result.tags[:5] %}
+                    <span class="tag-tag">#{{ tag }}</span>
+                    {% endfor %}
+                    {% if result.tags|length > 5 %}
+                    <span class="tag-more">+{{ result.tags|length - 5 }}</span>
+                    {% endif %}
+                </span>
+                {% endif %}
+                {% if result.created %}
+                <time datetime="{{ result.created }}">{{ result.created[:10] }}</time>
+                {% endif %}
+            </div>
+        </li>
+        {% endfor %}
+    </ul>
+    {% elif query %}
+    <p class="empty-state">No results for <strong>"{{ query }}"</strong>. Try different keywords.</p>
+    {% else %}
+    <p class="empty-state">Enter a search query above to find notes.</p>
+    {% endif %}
+</section>
+{% endblock %}
+
+{% block extra_scripts %}
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+    const input = document.getElementById('search-input');
+    if (input) {
+        input.focus();
+
+        // Client-side fuzzy search debounced
+        let debounceTimer;
+        input.addEventListener('input', function() {
+            clearTimeout(debounceTimer);
+            const q = this.value.trim();
+            if (q.length < 2) return;
+
+            debounceTimer = setTimeout(() => {
+                fetch('/search.json')
+                    .then(r => r.json())
+                    .then(index => {
+                        // Simple client-side filter (can be replaced with Fuse.js)
+                        const results = index.filter(item =>
+                            item.title.toLowerCase().includes(q.toLowerCase()) ||
+                            item.content.toLowerCase().includes(q.toLowerCase()) ||
+                            item.tags.some(t => t.toLowerCase().includes(q.toLowerCase()))
+                        ).slice(0, 20);
+                        renderResults(results, q);
+                    });
+            }, 200);
+        });
+    }
+
+    function highlight(text, query) {
+        if (!query) return text;
+        const regex = new RegExp(`(${query.replace(/[.*+?^${}()|[\]\\]/g, '\\$&')})`, 'gi');
+        return text.replace(regex, '<mark class="search-highlight">$1</mark>');
+    }
+
+    function renderResults(results, query) {
+        const container = document.querySelector('.search-results');
+        if (!container) return;
+        if (!results.length) {
+            container.innerHTML = '<p class="empty-state">No results for <strong>"' + query + '"</strong></p>';
+            return;
+        }
+        container.innerHTML = results.map(r => `
+            <li class="search-result">
+                <h3 class="search-result-title"><a href="${r.url}">${highlight(r.title, query)}</a></h3>
+                <p class="search-result-excerpt">${highlight(r.excerpt, query)}</p>
+                <div class="search-result-meta">
+                    ${r.tags?.slice(0,5).map(t => `<span class="tag-tag">#${t}</span>`).join('') || ''}
+                    ${r.created ? `<time>${r.created.slice(0,10)}</time>` : ''}
+                </div>
+            </li>
+        `).join('');
+    }
+});
+</script>
+{% endblock %}

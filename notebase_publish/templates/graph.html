@@ -1,0 +1,64 @@
+{% extends "base.html" %}
+
+{% block title %}Knowledge Graph | notebase-publish{% endblock %}
+{% block description %}Interactive visualization of the knowledge graph{% endblock %}
+{% block body_class %}graph-page{% endblock %}
+
+{% block extra_head %}
+<style>
+#graph-container {
+    width: 100%;
+    height: 80vh;
+    min-height: 600px;
+    background: var(--bg-primary);
+    border-radius: 8px;
+    border: 1px solid var(--border-color);
+}
+</style>
+{% endblock %}
+
+{% block content %}
+<header class="page-header">
+    <nav class="breadcrumb" aria-label="Breadcrumb">
+        <a href="/">Home</a> / <span>Knowledge Graph</span>
+    </nav>
+    <h1 class="page-title">🕸️ Knowledge Graph</h1>
+    <p class="page-subtitle">Interactive visualization of note connections & concept clusters</p>
+</header>
+
+<main class="graph-main">
+    <div id="graph-container"></div>
+
+    <aside class="graph-legend" aria-label="Graph legend">
+        <h3>Legend</h3>
+        <div id="legend-items" class="legend-items"></div>
+        <div class="legend-stats">
+            <span id="node-count">0 nodes</span>
+            <span id="edge-count">0 edges</span>
+        </div>
+    </aside>
+
+    <aside class="graph-info" aria-label="Node info">
+        <div id="node-info" class="node-info hidden">
+            <h3 id="info-title"></h3>
+            <p id="info-tags"></p>
+            <a id="info-link" href="#" target="_blank" class="btn btn-primary">Open Note →</a>
+        </div>
+        <p class="info-hint">Click a node to see details</p>
+    </aside>
+</main>
+{% endblock %}
+
+{% block extra_scripts %}
+<script src="https://unpkg.com/cytoscape@3.28.1/dist/cytoscape.min.js"></script>
+<script src="/static/js/graph.js"></script>
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+    // Load graph data and initialize
+    fetch('/graph.json')
+        .then(r => r.json())
+        .then(data => initGraph(data))
+        .catch(console.error);
+});
+</script>
+{% endblock %}
