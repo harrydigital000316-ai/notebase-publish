@@ -62,7 +62,7 @@ jobs:
           notebase-publish build --vault /home/11405611/dev_notes --out _site
       
       - name: Upload artifact
-        uses: actions/upload-artifact@v4
+        uses: actions/upload-artifact@v7
         with:
           name: preview-site
           path: _site/
