@@ -1,0 +1,207 @@
+name: Daily Cron Jobs
+
+on:
+  schedule:
+    # 00:00 UTC = 08:00 Taipei - Nightly Skill Learning
+    - cron: '0 0 * * *'
+    # 03:00 UTC = 11:00 Taipei - Knowledge Share
+    - cron: '0 3 * * *'
+    # 06:00 UTC = 14:00 Taipei - Taiwan Market Bridge
+    - cron: '0 6 * * *'
+    # 11:30 UTC = 19:30 Taipei - Env Check
+    - cron: '30 11 * * *'
+    # 12:00 UTC = 20:00 Taipei - Dev Cycle Phase 1: Ideation
+    - cron: '0 12 * * *'
+    # 15:00 UTC = 23:00 Taipei - Dev Cycle Phase 2: Implementation
+    - cron: '0 15 * * *'
+    # 18:00 UTC = 02:00 Taipei - Dev Cycle Phase 3: Review
+    - cron: '0 18 * * *'
+    # 20:00 UTC = 04:00 Taipei - Global Macro Analysis
+    - cron: '0 20 * * *'
+    # 21:00 UTC = 05:00 Taipei - Dev Cycle Phase 4: Deploy Summary
+    - cron: '0 21 * * *'
+    # Saturday 01:00 UTC = 09:00 Taipei - Weekly Synthesis
+    - cron: '0 1 * * 6'
+  workflow_dispatch:
+
+jobs:
+  nightly-skill-learning:
+    if: github.event.schedule == '0 0 * * *' || github.event_name == 'workflow_dispatch'
+    runs-on: ubuntu-latest
+    timeout-minutes: 30
+    steps:
+      - uses: actions/checkout@v4
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+          cache: 'pip'
+      - name: Install
+        run: pip install -e .
+      - name: Run skill learning
+        run: |
+          # TODO: Implement skill learning agent
+          echo "Running nightly skill learning..."
+        env:
+          HERMES_API_KEY: ${{ secrets.HERMES_API_KEY }}
+
+  knowledge-share:
+    if: github.event.schedule == '0 3 * * *' || github.event_name == 'workflow_dispatch'
+    runs-on: ubuntu-latest
+    timeout-minutes: 30
+    steps:
+      - uses: actions/checkout@v4
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+          cache: 'pip'
+      - name: Install
+        run: pip install -e .
+      - name: Run knowledge share
+        run: |
+          echo "Running 03:00 knowledge share..."
+
+  taiwan-market-bridge:
+    if: github.event.schedule == '0 6 * * *' || github.event_name == 'workflow_dispatch'
+    runs-on: ubuntu-latest
+    timeout-minutes: 60
+    steps:
+      - uses: actions/checkout@v4
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+          cache: 'pip'
+      - name: Install
+        run: pip install -e .
+      - name: Run Taiwan market analysis
+        run: |
+          echo "Running Taiwan market bridge..."
+          # Fetch Wiwynn, etc. data
+          # Write to notebase vault
+        env:
+          HERMES_API_KEY: ${{ secrets.HERMES_API_KEY }}
+
+  env-check:
+    if: github.event.schedule == '30 11 * * *' || github.event_name == 'workflow_dispatch'
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    steps:
+      - uses: actions/checkout@v4
+      - name: Environment check
+        run: |
+          echo "Python: $(python --version)"
+          echo "Git: $(git --version)"
+          echo "Disk: $(df -h / | tail -1)"
+          echo "Memory: $(free -h | grep Mem)"
+
+  dev-cycle-12-ideation:
+    if: github.event.schedule == '0 12 * * *' || github.event_name == 'workflow_dispatch'
+    runs-on: ubuntu-latest
+    timeout-minutes: 60
+    steps:
+      - uses: actions/checkout@v4
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+          cache: 'pip'
+      - name: Install
+        run: pip install -e .
+      - name: Run ideation phase
+        run: |
+          echo "Running 12:00 ideation..."
+
+  dev-cycle-15-implementation:
+    if: github.event.schedule == '0 15 * * *' || github.event_name == 'workflow_dispatch'
+    runs-on: ubuntu-latest
+    timeout-minutes: 120
+    steps:
+      - uses: actions/checkout@v4
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+          cache: 'pip'
+      - name: Install
+        run: pip install -e .
+      - name: Run implementation phase
+        run: |
+          echo "Running 15:00 implementation..."
+
+  dev-cycle-18-review:
+    if: github.event.schedule == '0 18 * * *' || github.event_name == 'workflow_dispatch'
+    runs-on: ubuntu-latest
+    timeout-minutes: 60
+    steps:
+      - uses: actions/checkout@v4
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+          cache: 'pip'
+      - name: Install
+        run: pip install -e .
+      - name: Run review phase
+        run: |
+          echo "Running 18:00 review..."
+
+  global-macro:
+    if: github.event.schedule == '0 20 * * *' || github.event_name == 'workflow_dispatch'
+    runs-on: ubuntu-latest
+    timeout-minutes: 90
+    steps:
+      - uses: actions/checkout@v4
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+          cache: 'pip'
+      - name: Install
+        run: pip install -e .
+      - name: Run Global Macro analysis
+        run: |
+          echo "Running 20:00 Global Macro analysis..."
+          # Condensed output for Telegram
+          # Full analysis to notebase vault
+        env:
+          HERMES_API_KEY: ${{ secrets.HERMES_API_KEY }}
+
+  dev-cycle-21-deploy:
+    if: github.event.schedule == '0 21 * * *' || github.event_name == 'workflow_dispatch'
+    runs-on: ubuntu-latest
+    timeout-minutes: 60
+    steps:
+      - uses: actions/checkout@v4
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+          cache: 'pip'
+      - name: Install
+        run: pip install -e .
+      - name: Build and deploy
+        run: |
+          echo "Running 21:00 deploy summary..."
+          notebase-publish build --vault ${{ secrets.NOTES_VAULT_PATH }} --out _site
+          notebase-publish deploy --out _site --target github-pages
+        env:
+          NOTES_VAULT_PATH: ${{ secrets.NOTES_VAULT_PATH }}
+
+  weekly-synthesis:
+    if: github.event.schedule == '0 1 * * 6' || github.event_name == 'workflow_dispatch'
+    runs-on: ubuntu-latest
+    timeout-minutes: 60
+    steps:
+      - uses: actions/checkout@v4
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+          cache: 'pip'
+      - name: Install
+        run: pip install -e .
+      - name: Run weekly synthesis
+        run: |
+          echo "Running Saturday 09:00 weekly synthesis..."

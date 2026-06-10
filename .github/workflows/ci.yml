@@ -1,0 +1,69 @@
+name: CI
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+    branches: [main]
+
+jobs:
+  lint-and-test:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+          cache: 'pip'
+      
+      - name: Install dependencies
+        run: |
+          python -m pip install --upgrade pip
+          pip install -e .[dev]
+      
+      - name: Lint with ruff
+        run: ruff check notebase_publish tests
+      
+      - name: Type check with mypy
+        run: mypy notebase_publish
+      
+      - name: Run tests
+        run: pytest -v
+      
+      - name: Build site (smoke test)
+        run: |
+          mkdir -p test_vault
+          echo -e "---\ntitle: Test\ntags: [test]\n---\n# Test Note\n\nContent" > test_vault/test.md
+          notebase-publish build --vault test_vault --out test_site --verbose
+          test -f test_site/index.html
+          test -f test_site/search.json
+          test -f test_site/graph.json
+
+  deploy-preview:
+    needs: lint-and-test
+    if: github.event_name == 'pull_request'
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+          cache: 'pip'
+      
+      - name: Install dependencies
+        run: pip install -e .[dev]
+      
+      - name: Build site
+        run: |
+          notebase-publish build --vault /home/11405611/dev_notes --out _site
+      
+      - name: Upload artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: preview-site
+          path: _site/
+          retention-days: 7
