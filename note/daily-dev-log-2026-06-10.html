@@ -1,0 +1,221 @@
+<!DOCTYPE html>
+<html lang="zh-TW">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Daily Dev Log: 2026-06-10 | notebase-publish</title>
+    <meta name="description" content="# Daily Dev Log: 2026-06-10 ## 📅 Date 2026-06-10 ## 💡 Concept **Project: notebase-insight** — AI&#39;s strategic cognitive cortex. An automated insight engine that analyzes the notebase vault to produc">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;500;700&family=Noto+Sans+TC:wght@300;400;500;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="/static/css/main.css">
+</head>
+<body class="note-page">
+    <header class="site-header" role="banner">
+        <div class="header-inner">
+            <a href="/" class="site-title" aria-label="Home">
+                <span class="title-icon">🦞</span>
+                <span class="title-text">notebase-publish</span>
+            </a>
+            <nav class="site-nav" aria-label="Main navigation">
+                <a href="/">📝 Notes</a>
+                <a href="/tags/">🏷️ Tags</a>
+                <a href="/daily/">📅 Daily</a>
+                <a href="/graph.html">🕸️ Graph</a>
+                <a href="/search.html">🔍 Search</a>
+            </nav>
+            <button class="theme-toggle" id="theme-toggle" aria-label="Toggle dark mode">
+                <svg class="sun-icon" viewBox="0 0 24 24"><circle cx="12" cy="12" r="5"/><line x1="12" y1="1" x2="12" y2="3"/><line x1="12" y1="21" x2="12" y2="23"/><line x1="4.22" y1="4.22" x2="5.64" y2="5.64"/><line x1="18.36" y1="18.36" x2="19.78" y2="19.78"/><line x1="1" y1="12" x2="3" y2="12"/><line x1="21" y1="12" x2="23" y2="12"/><line x1="4.22" y1="19.78" x2="5.64" y2="18.36"/><line x1="18.36" y1="5.64" x2="19.78" y2="4.22"/></svg>
+                <svg class="moon-icon" viewBox="0 0 24 24"><path d="M12 3a6 6 0 0 0 9 9 9 9 0 1 1-9-9Z"/></svg>
+            </button>
+        </div>
+    </header>
+
+    <main class="site-main" role="main">
+<article class="note">
+    <header class="note-header">
+        <h1 class="note-title">Daily Dev Log: 2026-06-10</h1>
+        <div class="note-meta">
+            <time datetime="2026-06-10T21:09:44">2026-06-10 21:09</time>
+            <div class="note-tags">
+                <a href="/tags/phase4-summary.html" class="tag">#phase4-summary</a>
+                <a href="/tags/tag.html" class="tag">#tag</a>
+                <a href="/tags/devlog.html" class="tag">#devlog</a>
+                <a href="/tags/notebase-insight.html" class="tag">#notebase-insight</a>
+                <a href="/tags/investment.html" class="tag">#investment</a>
+            </div>
+        </div>
+    </header>
+
+    <div class="note-content" id="note-content">
+        <h1>Daily Dev Log: 2026-06-10</h1>
+<h2>📅 Date</h2>
+<p>2026-06-10</p>
+<h2>💡 Concept</h2>
+<p><strong>Project: notebase-insight</strong> — AI's strategic cognitive cortex. An automated insight engine that analyzes the notebase vault to produce knowledge syntheses, gap reports, thesis validation, and project health dashboards. Runs via cron, writes insights back to vault — closing the loop between accumulation and synthesis.</p>
+<h2>🛠 Tech Stack</h2>
+<ul>
+<li>Python 3.10+</li>
+<li>networkx (graph analysis)</li>
+<li>rapidfuzz (text similarity)</li>
+<li>scikit-learn (TF-IDF/clustering optional)</li>
+<li>pyyaml, markdown-it-py, typer, rich, jinja2</li>
+<li>sqlite-vec (semantic search if available)</li>
+</ul>
+<h2>📁 File Tree</h2>
+<pre><code>notebase-insight/
+├── pyproject.toml, requirements.txt, README.md
+├── notebase_insight/
+│   ├── __init__.py, __main__.py, cli.py
+│   ├── config.py          # YAML config (~/.config/notebase-insight/)
+│   ├── vault.py           # Vault parser (reusable!)
+│   ├── graph.py           # Graph analysis (reusable!)
+│   ├── synthesis.py       # Daily synthesis
+│   ├── gaps.py            # Knowledge gaps
+│   ├── validation.py      # Thesis validation
+│   ├── health.py          # Project health
+│   ├── tag_drift.py       # Tag drift
+│   └── logging_config.py  # Structured logging (NEW)
+└── tests/test_vault.py    # Unit tests (3 new tests added)
+</code></pre>
+<h2>✅ Verification</h2>
+<p><strong>Test command:</strong> <code>cd ~/dev_projects/notebase-insight &amp;&amp; .venv/bin/python -m py_compile notebase_insight/cli.py notebase_insight/vault.py notebase_insight/graph.py notebase_insight/synthesis.py notebase_insight/gaps.py notebase_insight/validation.py notebase_insight/health.py notebase_insight/tag_drift.py notebase_insight/logging_config.py</code></p>
+<p><strong>Output:</strong> All files compile without syntax errors. ✅</p>
+<p><strong>Additional verification:</strong></p>
+<ul>
+<li><code>ruff check notebase_insight/</code> — clean</li>
+<li><code>mypy notebase_insight/</code> — clean (with types-PyYAML)</li>
+<li><code>pytest tests/</code> — 3 new tests pass (test_inline_tag_regex, test_logging_setup, test_get_logger)</li>
+</ul>
+<h2>🚀 How to Run</h2>
+<pre><code class="language-bash"># Daily synthesis (runs at 00:30 via cron)
+cd ~/dev_projects/notebase-insight &amp;&amp; .venv/bin/notebase-insight run --type daily
+
+# Project health (runs at 18:30 via cron)
+cd ~/dev_projects/notebase-insight &amp;&amp; .venv/bin/notebase-insight run --type project-health
+
+# Thesis validation (runs at 20:30 via cron)
+cd ~/dev_projects/notebase-insight &amp;&amp; .venv/bin/notebase-insight run --type thesis-validation
+
+# Weekly synthesis (Saturday 03:00)
+cd ~/dev_projects/notebase-insight &amp;&amp; .venv/bin/notebase-insight run --type weekly
+
+# Monthly tag drift (1st of month 04:00)
+cd ~/dev_projects/notebase-insight &amp;&amp; .venv/bin/notebase-insight run --type monthly
+
+# All types at once
+cd ~/dev_projects/notebase-insight &amp;&amp; .venv/bin/notebase-insight run --type all
+
+# Config check
+cd ~/dev_projects/notebase-insight &amp;&amp; .venv/bin/notebase-insight config --show
+</code></pre>
+<h2>🐛 Issues Encountered &amp; Fixed (Phase 3 Review)</h2>
+<p>All 10 review issues addressed in Phase 3 (18:00):</p>
+<table>
+<thead>
+<tr>
+<th>#</th>
+<th>Issue</th>
+<th>Fix</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>1</td>
+<td>CLI <code>_create_graph_topology_note</code>: Missing <code>Path</code> import, datetime import in wrong place</td>
+<td>Moved imports to function top, added <code>from pathlib import Path</code></td>
+</tr>
+<tr>
+<td>2</td>
+<td><code>validation.py simulate_market_data</code>: Non-deterministic random for testing</td>
+<td>Added optional <code>seed</code> parameter; deterministic seed from note slug</td>
+</tr>
+<tr>
+<td>3</td>
+<td><code>tag_drift.py</code>: Unused <code>numpy</code> import</td>
+<td>Removed <code>import numpy as np</code></td>
+</tr>
+<tr>
+<td>4</td>
+<td><code>vault.py INLINE_TAG_PATTERN</code>: Regex missed tags after punctuation</td>
+<td>Changed to <code>(?&lt;!\w)#([\w\-\/]+)</code> — captures <code>#tag</code> after <code>(</code>, <code>[</code>, <code>{</code>, <code>.</code></td>
+</tr>
+<tr>
+<td>5</td>
+<td><code>cli.py _write_note_to_vault</code>: Silent overwrite on duplicate filenames</td>
+<td>Added counter suffix logic (<code>file-1.md</code>, <code>file-2.md</code>, ...)</td>
+</tr>
+<tr>
+<td>6</td>
+<td>CLI <code>run</code> command: No validation for missing vault path</td>
+<td>Added explicit check with helpful error message and exit code</td>
+</tr>
+<tr>
+<td>7</td>
+<td>Type hints on public functions</td>
+<td>✅ All analysis modules already well-typed</td>
+</tr>
+<tr>
+<td>8</td>
+<td><code>health.py</code> deduplication: Verbose manual seen/set loop</td>
+<td>Simplified to <code>{note.slug: note for note in all_issues}.values()</code></td>
+</tr>
+<tr>
+<td>9</td>
+<td>Logging: Only rich console, no structured logging</td>
+<td>Created <code>logging_config.py</code> with <code>setup_logging()</code>/<code>get_logger()</code>; added <code>--verbose</code>/<code>-v</code> and <code>--quiet</code>/<code>-q</code> flags</td>
+</tr>
+<tr>
+<td>10</td>
+<td><code>config.py load_config</code>: No warning for non-existent vault path</td>
+<td>Added <code>UserWarning</code> when configured vault path doesn't exist</td>
+</tr>
+</tbody>
+</table>
+<p><strong>Bug fix:</strong> <code>gaps.py</code> datetime inconsistency — was importing <code>datetime as dt</code> but using <code>datetime.now()</code> directly (would raise <code>NameError</code>). Fixed.</p>
+<h2>💡 Ideas for Tomorrow</h2>
+<ul>
+<li>[ ] Test the full cron integration: run <code>notebase-insight run --type daily</code> against actual vault</li>
+<li>[ ] Verify thesis validation with real market data API (currently simulates)</li>
+<li>[ ] Add semantic search (sqlite-vec) for more powerful gap detection</li>
+<li>[ ] Create web dashboard via <code>notebase-insight serve</code> for ad-hoc queries</li>
+<li>[ ] Add more sophisticated investment thesis extraction from #investment notes</li>
+<li>[ ] Consider plugin system for custom analysis types</li>
+</ul>
+
+    </div>
+
+
+    <footer class="note-footer">
+        <p class="edit-hint">This note is part of <a href="https://github.com/notebase/notebase-publish">notebase-publish</a></p>
+    </footer>
+</article>
+    </main>
+
+    <footer class="site-footer" role="contentinfo">
+        <p>Generated by <a href="https://github.com/notebase/notebase-publish">notebase-publish</a> · AI's cognitive exoskeleton</p>
+    </footer>
+
+    <script src="/static/js/main.js"></script>
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+    // Smooth scroll for internal links
+    document.querySelectorAll('a[href^="#"]').forEach(anchor => {
+        anchor.addEventListener('click', function(e) {
+            const target = document.querySelector(this.getAttribute('href'));
+            if (target) {
+                e.preventDefault();
+                target.scrollIntoView({ behavior: 'smooth' });
+            }
+        });
+    });
+
+    // Highlight current note in graph if on graph page
+    const slug = "daily-dev-log-2026-06-10";
+    if (window.cytoscapeGraph) {
+        window.cytoscapeGraph.nodes('[id="' + slug + '"]').addClass('highlighted');
+    }
+});
+</script>
+</body>
+</html>

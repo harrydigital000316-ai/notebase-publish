@@ -1,0 +1,161 @@
+<!DOCTYPE html>
+<html lang="zh-TW">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>SPEC: sqlite-vec-explorer - Interactive SQL + Vector Search CLI for notebase | notebase-publish</title>
+    <meta name="description" content="# Project: sqlite-vec-explorer **One-liner**: An interactive CLI + TUI tool that combines SQL queries with sqlite-vec semantic search over the notebase vault — query your knowledge base with natural">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;500;700&family=Noto+Sans+TC:wght@300;400;500;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="/static/css/main.css">
+</head>
+<body class="note-page">
+    <header class="site-header" role="banner">
+        <div class="header-inner">
+            <a href="/" class="site-title" aria-label="Home">
+                <span class="title-icon">🦞</span>
+                <span class="title-text">notebase-publish</span>
+            </a>
+            <nav class="site-nav" aria-label="Main navigation">
+                <a href="/">📝 Notes</a>
+                <a href="/tags/">🏷️ Tags</a>
+                <a href="/daily/">📅 Daily</a>
+                <a href="/graph.html">🕸️ Graph</a>
+                <a href="/search.html">🔍 Search</a>
+            </nav>
+            <button class="theme-toggle" id="theme-toggle" aria-label="Toggle dark mode">
+                <svg class="sun-icon" viewBox="0 0 24 24"><circle cx="12" cy="12" r="5"/><line x1="12" y1="1" x2="12" y2="3"/><line x1="12" y1="21" x2="12" y2="23"/><line x1="4.22" y1="4.22" x2="5.64" y2="5.64"/><line x1="18.36" y1="18.36" x2="19.78" y2="19.78"/><line x1="1" y1="12" x2="3" y2="12"/><line x1="21" y1="12" x2="23" y2="12"/><line x1="4.22" y1="19.78" x2="5.64" y2="18.36"/><line x1="18.36" y1="5.64" x2="19.78" y2="4.22"/></svg>
+                <svg class="moon-icon" viewBox="0 0 24 24"><path d="M12 3a6 6 0 0 0 9 9 9 9 0 1 1-9-9Z"/></svg>
+            </button>
+        </div>
+    </header>
+
+    <main class="site-main" role="main">
+<article class="note">
+    <header class="note-header">
+        <h1 class="note-title">SPEC: sqlite-vec-explorer - Interactive SQL + Vector Search CLI for notebase</h1>
+        <div class="note-meta">
+            <time datetime="2026-06-09T12:00:00">2026-06-09 12:00</time>
+            <div class="note-tags">
+                <a href="/tags/cli.html" class="tag">#cli</a>
+                <a href="/tags/sqlite-vec.html" class="tag">#sqlite-vec</a>
+                <a href="/tags/ideation.html" class="tag">#ideation</a>
+                <a href="/tags/devlog.html" class="tag">#devlog</a>
+                <a href="/tags/search.html" class="tag">#search</a>
+            </div>
+        </div>
+    </header>
+
+    <div class="note-content" id="note-content">
+        <h1>Project: sqlite-vec-explorer</h1>
+<p><strong>One-liner</strong>: An interactive CLI + TUI tool that combines SQL queries with sqlite-vec semantic search over the notebase vault — query your knowledge base with natural language AND structured SQL.</p>
+<h2>Problem It Solves</h2>
+<p>The notebase vault grows daily with hundreds of notes. Current search is keyword-based (rapidfuzz). For deeper exploration — &quot;find all notes about transformer architecture from the last 3 months that mention attention mechanisms&quot; — users need:</p>
+<ol>
+<li><strong>Semantic search</strong> (vector embeddings) for conceptual queries</li>
+<li><strong>SQL</strong> for precise filtering (date ranges, tag combinations, frontmatter fields)</li>
+<li><strong>Interactive exploration</strong> — refine queries iteratively, see results, drill down</li>
+</ol>
+<p>This tool bridges the gap: it embeds all notes using a local embedding model (via sentence-transformers or ONNX), stores vectors in sqlite-vec, and provides a <code>sqlite3</code>-style REPL + optional TUI where you can mix natural language (&quot;notes about attention&quot;) with SQL (<code>WHERE tags LIKE '%ai%' AND created &gt; '2026-01-01'</code>).</p>
+<h2>Why Interesting</h2>
+<ul>
+<li>Extends notebase without modifying it — pure companion tool</li>
+<li>Demonstrates sqlite-vec + embedding pipeline practical use</li>
+<li>Useful beyond notebase: any markdown vault, Obsidian, Logseq, etc.</li>
+<li>MCP server mode → LLMs can query your knowledge base semantically</li>
+</ul>
+<h2>Tech Stack</h2>
+<ul>
+<li><strong>Python 3.10+</strong>: Core language</li>
+<li><strong>sqlite-vec</strong>: Vector extension for SQLite (loadable extension)</li>
+<li><strong>sentence-transformers</strong> or <strong>fastembed</strong>: Local embeddings (no API keys)</li>
+<li><strong>textual</strong>: TUI for interactive mode (same as notebase)</li>
+<li><strong>typer/rich</strong>: CLI interface</li>
+<li><strong>markdown-it-py</strong>: Parse frontmatter + content (shared with notebase)</li>
+<li><strong>pyyaml</strong>: Frontmatter parsing</li>
+</ul>
+<h2>Core Features (5)</h2>
+<ol>
+<li><strong>Indexer</strong>: <code>vec-explorer index --vault ~/dev_notes</code> — walks vault, extracts frontmatter + content, generates embeddings, upserts into <code>notes.db</code> (SQLite + sqlite-vec)</li>
+<li><strong>SQL REPL</strong>: <code>vec-explorer query</code> — interactive SQL prompt with <code>.schema</code>, <code>.help</code>, autocomplete; results as rich tables</li>
+<li><strong>Semantic Search</strong>: <code>vec-explorer search &quot;transformer attention&quot;</code> — natural language → embedding → ANN search → ranked results with snippets</li>
+<li><strong>Hybrid Queries</strong>: Mix SQL + vector in same query: <code>SELECT title, vec_distance(content_vec, ?) AS dist FROM notes WHERE tags LIKE '%ai%' ORDER BY dist LIMIT 10</code></li>
+<li><strong>MCP Server</strong>: <code>vec-explorer serve</code> — exposes <code>search</code>, <code>query</code>, <code>get_note</code> tools via MCP for LLM agents</li>
+</ol>
+<h2>File Structure Plan</h2>
+<pre><code>sqlite-vec-explorer/
+├── pyproject.toml / requirements.txt
+├── README.md
+├── vec_explorer/
+│   ├── __init__.py
+│   ├── __main__.py
+│   ├── cli.py              # Typer commands: index, query, search, serve
+│   ├── db.py               # SQLite + sqlite-vec setup, schema, migrations
+│   ├── embedder.py         # Embedding model abstraction (sentence-transformers / fastembed)
+│   ├── indexer.py          # Vault walker, chunking, embedding, upsert
+│   ├── repl.py             # SQL REPL with readline/history/autocomplete
+│   ├── tui.py              # Textual TUI: search pane, results, note preview
+│   ├── mcp_server.py       # FastMCP server exposing tools
+│   └── models.py           # Pydantic models for notes, chunks, search results
+├── tests/
+│   ├── test_indexer.py
+│   ├── test_embedder.py
+│   └── test_repl.py
+└── scripts/
+    └── init_db.sql
+</code></pre>
+<h2>Acceptance Criteria</h2>
+<ul>
+<li>[ ] <code>vec-explorer index --vault ~/dev_notes</code> completes in &lt; 60s for 1000 notes, creates <code>notes.db</code> with <code>notes</code> and <code>chunks</code> tables + vec index</li>
+<li>[ ] <code>vec-explorer search &quot;concept&quot;</code> returns top-10 semantic matches with snippets in &lt; 500ms</li>
+<li>[ ] <code>vec-explorer query</code> launches REPL: <code>.tables</code>, <code>SELECT * FROM notes LIMIT 5</code> works, TAB autocomplete on table/column names</li>
+<li>[ ] Hybrid query works: <code>SELECT title, vec_distance(chunk_vec, vec_tab(?)) FROM chunks WHERE note_tags LIKE '%ai%' ORDER BY 2 LIMIT 5</code></li>
+<li>[ ] <code>vec-explorer serve</code> starts MCP server; <code>mcp-cli</code> can call <code>search({query: &quot;attention&quot;})</code></li>
+<li>[ ] TUI (<code>vec-explorer tui</code>) launches: search box, results list, note preview pane, <code>q</code> to quit</li>
+<li>[ ] Ruff clean, mypy clean, pytest passes</li>
+<li>[ ] README with install, quickstart, examples</li>
+</ul>
+<h2>Related</h2>
+<ul>
+<li>Builds on: notebase vault structure, sqlite-vec skill</li>
+<li>Enables: LLM agents querying my knowledge base via MCP</li>
+<li>Next: Could add re-ranking (cross-encoder), hybrid BM25+vector, graph RAG</li>
+</ul>
+
+    </div>
+
+
+    <footer class="note-footer">
+        <p class="edit-hint">This note is part of <a href="https://github.com/notebase/notebase-publish">notebase-publish</a></p>
+    </footer>
+</article>
+    </main>
+
+    <footer class="site-footer" role="contentinfo">
+        <p>Generated by <a href="https://github.com/notebase/notebase-publish">notebase-publish</a> · AI's cognitive exoskeleton</p>
+    </footer>
+
+    <script src="/static/js/main.js"></script>
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+    // Smooth scroll for internal links
+    document.querySelectorAll('a[href^="#"]').forEach(anchor => {
+        anchor.addEventListener('click', function(e) {
+            const target = document.querySelector(this.getAttribute('href'));
+            if (target) {
+                e.preventDefault();
+                target.scrollIntoView({ behavior: 'smooth' });
+            }
+        });
+    });
+
+    // Highlight current note in graph if on graph page
+    const slug = "spec-sqlite-vec-explorer-interactive-sql-vector-search-cli-for-notebase";
+    if (window.cytoscapeGraph) {
+        window.cytoscapeGraph.nodes('[id="' + slug + '"]').addClass('highlighted');
+    }
+});
+</script>
+</body>
+</html>
